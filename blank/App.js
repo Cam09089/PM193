@@ -1,69 +1,63 @@
-/*ZONA 1: Importaciones */
+/*Zona de importaciones */
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import React, { useState } from 'react';
 
-//componnente Propio Texto
-const Texto = ({style}) => {
-  const[contenido,setContenido] = useState('Hola Mundo');
-
-
-  const actualizarTexto = () => {
-    setContenido('Estado Modificado');
-  }
-
-  return (
-    <Text style={[styles.Text, style]} onPress={actualizarTexto}>{contenido}</Text>
-  )
-}
-//componente Propio Boton
-const Boton = () => {
-  const[contenido,setContenido] = useState('Presionar');
-  const actualizarBoton = () => {
-    setContenido('Estas tocandomeee');
-  }
-
-  return (
-    <Button title={contenido} onPress={actualizarBoton}></Button>
-  )
-}
+import { Alert, ScrollView, TouchableOpacity,TouchableHighlight, TouchableNativeFeedback, Pressable, Switch } from 'react-native'; //practica 8
+import {Button as Buttonpaper, Provider as ProveedorPaper} from 'react-native-paper';
+import {Button as ButtonElements} from 'react-native-elements';
 
 
 
-
-/*ZONA 2: Main*/ 
+/*Zona de ejecucion */
 export default function App() {
+  const [ModoOscuro, setModoOscuro] = useState(false);
+
+  const alternarModoOscuro = () => setModoOscuro(previo => !previo);
   return (
-    <View style={styles.container}>
+  <ProveedorPaper>
+    <ScrollView contentContainerStyle={styles.ScrollContainer}>
+      <View style={[styles.container, { backgroundColor: ModoOscuro ? '#333' : '#fff' }]}>
+      </View>
+      <View style={styles.container}>
+        <Text style={styles.title}>Modo de pantalla: {ModoOscuro ? 'oscuro' : 'claro'}</Text>
+        <Switch value={ModoOscuro} onValueChange={alternarModoOscuro} />
+      </View>
+    </ScrollView>
 
-      <Texto style={styles.morado}>Hola</Texto>
-      <Texto style={styles.verde}>Mundo</Texto>
-      <Texto style={styles.rojo}>react</Texto>
-    
-      <StatusBar style="auto" />
+    {/* Botton 1 */}
+     <View style={styles.section}>
+      <Text style={styles.title}>Primer boton</Text>
+      <Button
+        tittle="Boton Nativo"
+        color="#841584"
+        onPress={() => window.alert('Boton Nativo precionado')}>
 
+      </Button>
     </View>
+  </ProveedorPaper>
   );
 }
 
-/*ZONA 3: Estilos- Estetica*/ 
+/*Zona de Estilos */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'flex-stretch',
-    justifyContent: 'space-around',
- 
+    alignItems: 'center', //Izquierda a derecha
+    justifyContent: 'center', //Arriba a abajo
+    paddingHorizontal: 16,
+    paddingBottom: 50,
   },
-  Text: {
-    color: 'pink',
-    fontSize: 30,
-    height: 150,
-    width: 150,
+  title: {
+    fontSize: 16,
+    marginVertical: 6,
+    textAlign: 'center',
+    color: '#000',
   },
-  // Colores personalizados
-  morado: {backgroundColor: 'purple'},
-  verde: {backgroundColor: 'green'},
-  rojo: {backgroundColor: 'red'},
+  section:{
+    marginVertical: 15,
+    textAlign: 'center',
+    width: '100%',
+  }
 });
-
