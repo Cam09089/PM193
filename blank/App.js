@@ -1,83 +1,66 @@
-// Importamos los módulos necesarios de React y React Native
-import { use } from 'react';
-import React, { useRef } from 'react';
-import {
-  ScrollView, // Para hacer el contenido desplazable
-  StatusBar // Para acceder a la altura de la barra de estado
-  ,
+// Importamos react y sus funciones para manejar estados y ejecutar código cuando
+// la app cargue 
+import React, { useEffect, useState } from 'react';
 
-  StyleSheet, // Para crear estilos
-  Text
-} from 'react-native';
+// Importamos componentes de react native para mostrar la interfaz, listas y estilos
+import { View, Text, FlatList, SectionList, StyleSheet } from 'react-native';
 
-// Importamos SafeAreaView y SafeAreaProvider para respetar las áreas seguras del dispositivo
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+//Creamos el componente principal App y usamos un estado "personas" que está vacío
+export default function App() {
+  const [personas, setPersonas] = useState([]); //Con setPersona actualizamos y obtenemos el backend
 
-// Componente principal de la aplicación
-const App = () => {
+  //Se ejecuta una vez cuando la app carga
+  useEffect(() => {
+    fetch('http://localhost:8000/nombres') //llamamos el endpoint
+      .then(res => res.json()) //si la respuesta llega correcta entonces
+      .then(data => setPersonas(data)) // guardamos los datos en setPersonas
+      .catch(err => console.error(err)); //sino muestra el error
+  }, []);
 
-return (
+  // Datos para FlatList: mostramos solo nombres
+  // Usamos map para ir trayendo los datos y transformarlos en un nuevo arreglo
+  const flatData = personas.map((p, index) => ({
+    key: index.toString(), //convierte el número a texto
+    nombre: p.Nombre, //traemos solo el nombre de p que es personas
+    apellido: p.Apellido
+  }));
 
-  // SafeAreaProvider es necesario para que SafeAreaView funcione correctamente
-  <SafeAreaProvider>
-    {/* SafeAreaView asegura que el contenido no se superponga con la barra de estado, muescas, etc. */}
-    <SafeAreaView style={styles.container} edges={['top']}>
-      {/* ScrollView permite que el contenido sea desplazable si excede el alto de la pantalla */}
-      <ScrollView horizontal={true} >
-      <ScrollView style={styles.scrollView}>
-        {/* Texto largo para probar el scroll */}
-        <Text style={styles.text}>
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-          Este es el texto que ocupara todo el espacio 
-          para que podamos ver el espacio que ocupe el scrollView.
-        </Text>
-      </ScrollView>
-      </ScrollView>
-    </SafeAreaView>
-  </SafeAreaProvider>
-);
+  // Datos para SectionList: agrupado por Apellido
+  const sectionData = personas.map((p) => ({
+    title: p.Apellido, //aqui traemos de acuerdo a una sección específica, osea apellidos
+    data: [p.Nombre] // traemos también el nombre pero solo como extra
+  }));
+
+  // Renderizamos la interfaz de usuario
+  return (
+
+    //Esto es para flatlist
+    <View style={styles.container}>
+      <Text style={styles.title}>FlatList - Solo Nombres</Text>
+      <FlatList 
+        data={flatData} //por cada dato, que se cree un texto
+        renderItem={({ item }) => <Text style={styles.item}>{item.apellido} {item.nombre}</Text>}
+        keyExtractor={item => item.key}
+      />
+
+      {/* Esto es para SectionList */}
+      <Text style={styles.title}>SectionList - Agrupado por Apellido</Text> {/* Muestra el título */}
+      <SectionList
+        sections={sectionData} /* Se pasan los datos a mostrar en la SectionList */
+        keyExtractor={(item, index) => item + index} /* Se identifica de manera unica el item, Andrea0, Carol1 */
+        renderItem={({ item }) => <Text style={styles.item}>{item}</Text>} /* defino cada elemento de una sección (nombres)*/
+        renderSectionHeader={({ section: { title } }) => ( /* defino como mostrar cada seccion (apellidos) */
+          <Text style={styles.header}>{title}</Text> 
+        )}
+      />
+    </View>
+  );
 }
-// Definimos los estilos con StyleSheet
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,                             // Ocupa todo el alto disponible de la pantalla
-    paddingTop: StatusBar.currentHeight // Evita que el contenido se solape con la barra de estado
-  },
-  scrollView: {
-    backgroundColor: 'pink',            // Fondo rosa para visualizar el área del ScrollView
-  },
-  text: {
-    fontSize: 42,                        // Texto grande
-    padding: 12,                         // Espaciado interno
-  },
-});
 
-// Exportamos el componente para que pueda ser usado por la app
-export default App;
+// Son los estilos que le dare a la interfaz
+const styles = StyleSheet.create({
+  container: { flex: 1, paddingTop: 50, paddingHorizontal: 20 },
+  title: { fontSize: 20, fontWeight: 'bold', marginVertical: 10 },
+  item: { padding: 10, fontSize: 16 },
+  header: { fontSize: 18, fontWeight: 'bold', backgroundColor: '#ddd', padding: 5 },
+});
